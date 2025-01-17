@@ -22,7 +22,6 @@ while(1):
     # <tr> 아래의 <td>의 두 번째 요소들을 notice_list에 저장
     notice_list = soup.select('tr:not(.notice) > td:nth-of-type(2)')
 
-    
     # 마지막 공지사항 제목과 일치할 때까지 notice_list에서 공지사항을 하나씩 불러옴  
     for i in notice_list:
         title = i.select_one('a > strong')
@@ -38,4 +37,4 @@ while(1):
     last_notice = recently_notice.text
     print("현재 마지막 공지사항: ", last_notice)
     
-    time.sleep(10)
+    time.sleep(1800)
