@@ -2,28 +2,34 @@ import requests # request 라이브러리
 from bs4 import BeautifulSoup # BeautifulSoup 라이브러리
 import time # sleep을 사용하기 위한 time 라이브러리리
 from PyKakao import Message 
+from datetime import datetime
 
-# User-Agent를 설정하여 웹 브라우저에서의 요청인 것처럼 설정
-headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
+API = Message(service_key = "API 키 입력")
 
-# 마지막으로 작성된 공지사항의 제목을 저장 (처음만 임의로 작성해줌)
-last_notice = '2025학년도 2학기 해외 파견 교환학생 선발 안내'
+url = "https://kauth.kakao.com/oauth/token"
+headers = {
+    "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
+}
+data = {
+    "grant_type": "refresh_token",
+    "client_id": "API 키 입력", 
+    "refresh_token": "refresh token 키 입력"
+}
 
-# 소프트웨어공학과 학과 홈페이지 (프로토콜, 도메인 네임)
-base_link = 'https://sw.jnu.ac.kr'
+# POST 요청 보내기
+response = requests.post(url, headers=headers, data=data)
+response_data = response.json()
+access_token = response_data.get("access_token")
 
-# 액세스 토큰 할당
-API = Message(service_key = "내 API 키 입력")
-access_token = '액세스 토큰 입력'
 API.set_access_token(access_token)
 
 # 카카오톡 나에게 보내기 기능 (공지사항 제목과 링크를 보냄)
-def send_message(title, new_link):
+def send_message(title, new_link, site_name):
     
     # 메시지 유형 - 텍스트
     message_type = "text"
     # 파라미터
-    text = f"[소프트웨어공학과 새 공지사항]\n{title}\n{new_link}"
+    text = f"[{site_name} 새 공지사항]\n\n{title}\n\n{new_link}"
 
     link = {
                 "web_url": "www.naver.com",
@@ -38,31 +44,67 @@ def send_message(title, new_link):
         button_title=button_title,
     )
     
-while(1):
-    # 주어진 URL에서 html 데이터를 추출하여 data에 저장
-    data = requests.get('https://sw.jnu.ac.kr/sw/8250/subview.do',headers=headers)
 
-    # BeautifulSoup 라이브러리를 활용하여 html 문서를 구조화
-    soup = BeautifulSoup(data.text, 'html.parser')
+def crawling():
+    # User-Agent를 설정하여 웹 브라우저에서의 요청인 것처럼 설정
+    headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
 
-    # BeautifulSoup의 select()를 활용하여 CSS 선택자로 필요한 HTML 요소를 선택함
-    # <tr> 아래의 <td>의 두 번째 요소들을 notice_list에 저장
-    notice_list = soup.select('tr:not(.notice) > td:nth-of-type(2)')
-
-    # 마지막 공지사항 제목과 일치할 때까지 notice_list에서 공지사항을 하나씩 불러옴  
-    for i in notice_list:
-        title = i.select_one('a > strong')
-        if title.text == last_notice: # last_notice와 title이 같다면 종료(새롭게 작성된 게시글을 모두 불러왔다는 의미)
-            break
-        link = i.select_one('a')['href'] # 공지사항에서 <a>태그의 href속성을 추출하여 링크 저장 
-        # print("새로운 공지사항 제목:", title.text)
-        # print("링크:", base_link + link)
-        new_link = base_link + link
-        send_message(title.text, new_link)
-        
-    # 새로 작성된 게시글을 모두 알림으로 보낸 후, 마지막으로 작성된 게시글을 last_notice에 저장
-    recently_notice = soup.select_one('tr:not(.notice) > td > a > strong')
-    last_notice = recently_notice.text
-    print("현재 마지막 공지사항: ", last_notice)
+    # 크롤링할 사이트 리스트
+    sites = {
+        "소프트웨어공학과": {
+            "url": "https://sw.jnu.ac.kr/sw/8250/subview.do",
+            "base_link": "https://sw.jnu.ac.kr"
+        },
+        "인공지능학부": {
+            "url": "https://aisw.jnu.ac.kr/aisw/518/subview.do",
+            "base_link": "https://aisw.jnu.ac.kr"
+        },
+        "전자컴퓨터공학부": {
+            "url": "https://eceng.jnu.ac.kr/eceng/20079/subview.do",
+            "base_link": "https://eceng.jnu.ac.kr"
+        },
+        "학교 포털1": {
+            "url": "https://www.jnu.ac.kr/WebApp/web/HOM/COM/Board/board.aspx?boardID=5",
+            "base_link": "https://www.jnu.ac.kr"
+        },
+        "학교 포털2": {
+            "url": "https://www.jnu.ac.kr/WebApp/web/HOM/COM/Board/board.aspx?boardID=5&bbsMode=list&cate=0&page=2",
+            "base_link": "https://www.jnu.ac.kr"
+        }
+    }
+    today = datetime.today() # 현재날짜
     
-    time.sleep(1800)
+    # 각 사이트를 순회하며 크롤링
+    for site_name, site_info in sites.items():
+        print(f"{site_name} 새로운 공지사항")
+        
+        # HTML 데이터 가져오기
+        data = requests.get(site_info['url'], headers=headers)
+        soup = BeautifulSoup(data.text, 'html.parser')
+        # 공통된 부분: tr:not(.notice) > td:nth-of-type(2)
+        notice_list = soup.select('tbody > tr:not(.notice)')
+
+        for i in notice_list:
+            # 첫 번째 시도: a > strong
+            title = i.select_one('td:nth-of-type(2) > a > strong') # 공지사항 제목
+            link = i.select_one('td:nth-of-type(2) > a')['href'] # 공지사항 링크
+            date = i.select_one('td:nth-of-type(4)') # 공지사항 작성 날짜
+            
+            notice_date = date.text
+            if '.' in notice_date:
+                notice_date = notice_date.replace('.', '-')
+            notice_date = datetime.strptime(notice_date, "%Y-%m-%d")
+            
+            diff_date = today - notice_date
+            
+            if title:
+                pass
+            else:
+                # 두 번째 시도: a
+                title = i.select_one('td:nth-of-type(2) > a')
+            new_link = site_info['base_link'] + link
+            
+            if (diff_date.days == 0):
+                send_message(title.text, new_link, site_name)
+    
+crawling()
