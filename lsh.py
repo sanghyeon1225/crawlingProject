@@ -4,6 +4,7 @@ import time # sleep을 사용하기 위한 time 라이브러리리
 from PyKakao import Message 
 from datetime import datetime
 
+# 리프레쉬 토큰으로 새로운 액세스 토큰 발급 받기
 API = Message(service_key = "API 키 입력")
 
 url = "https://kauth.kakao.com/oauth/token"
@@ -81,8 +82,8 @@ def crawling():
     
     # 각 사이트를 순회하며 크롤링
     for site_name, site_info in sites.items():
-        print(f"{site_name} 새로운 공지사항")
-        
+        print(f"{site_name} 공지사항 확인")
+        count = 0
         # HTML 데이터 가져오기
         data = requests.get(site_info['url'], headers=headers)
         soup = BeautifulSoup(data.text, 'html.parser')
@@ -111,6 +112,10 @@ def crawling():
             
             if (diff_date.days == 0):
                 send_message(title.text, new_link, site_name)
+                count = count + 1
+        if count == 0:
+            print(f"{site_name}에 새로운 공지사항 없습니다.")
+        print("\n")
     
 crawling()
 
