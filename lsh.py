@@ -70,7 +70,12 @@ def crawling():
         "학교 포털2": {
             "url": "https://www.jnu.ac.kr/WebApp/web/HOM/COM/Board/board.aspx?boardID=5&bbsMode=list&cate=0&page=2",
             "base_link": "https://www.jnu.ac.kr"
+        },
+        "공학교육혁신센터": {
+            "url": "https://icee.jnu.ac.kr/icee/17915/subview.do",
+            "base_link": "https://icee.jnu.ac.kr"
         }
+        
     }
     today = datetime.today() # 현재날짜
     
