@@ -15,8 +15,8 @@ headers = {
 }
 data = {
     "grant_type": "refresh_token",
-    "client_id": "4a0e5f8b36abbbc192082ccb4ebbcf59",  # REST API 키
-    "refresh_token": "IEaFaMn6sZVFmPnFNsTPcDd2_SXYHFLgAAAAAgo8I-cAAAGUk7RUzLbGP5Eb7W-4"  # Refresh Token
+    "client_id": "api 키",  # REST API 키
+    "refresh_token": "refresh token"  # Refresh Token
 }
 
 # POST 요청으로 Access Token 갱신
