@@ -13,7 +13,7 @@ headers = {
 data = {
     "grant_type": "refresh_token",
     "client_id": "API 키 입력", 
-    "refresh_token": "refresh token 키 입력"
+    "refresh_token": "refresh token 입력"
 }
 
 # POST 요청 보내기
@@ -108,3 +108,6 @@ def crawling():
                 send_message(title.text, new_link, site_name)
     
 crawling()
+
+
+
