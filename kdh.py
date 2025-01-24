@@ -5,6 +5,7 @@ import time
 import schedule
 from datetime import datetime
 
+
 # PyKakao를 사용하여 메시지 전송 API를 초기화
 API = Message(service_key="카카오톡 AIP키")
 
